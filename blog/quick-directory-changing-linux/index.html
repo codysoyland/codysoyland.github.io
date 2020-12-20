@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Quick Directory Changing in Linux &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/quick-directory-changing-linux/">Quick Directory Changing in Linux</a></h1>
+                <span class="post-date">2009-06-15 </span>
+                <div class="post-content">
+                    <p>When working from a terminal, I often find myself typing the same commands over and over. There are a handful of long &ldquo;cd&rdquo; commands that I find myself typing regularly. I&rsquo;ve found a few ways of speeding up my workflow by using some bash tools and tricks, and now I can usually get where I need to be with just a few keystrokes.</p>
+<h2 id="aliases">Aliases</h2>
+<p>Here are a few commands I find myself typing regularly:</p>
+<pre><code>cd /usr/lib/python2.6/site-packages
+cd /usr/local/src/django
+cd ~/projects
+</code></pre>
+<p>One way to speed up your workflow is to alias these commands by adding the following lines to your ~/.bashrc:</p>
+<pre><code>alias .sp=&quot;cd /usr/lib/python2.6/site-packages&quot;
+alias .dj=&quot;cd /usr/local/src/django&quot;
+alias .p=&quot;cd ~/projects&quot;
+</code></pre>
+<p>After restarting bash, you can enter your site-packages folder just by typing &ldquo;.sp<!-- raw HTML omitted -->&rdquo;</p>
+<h2 id="bash-tricks">Bash Tricks</h2>
+<p>This can also be done with a function in bash, by adding the following to your ~/.bashrc:</p>
+<pre><code>function goto {
+    case $1 in
+        sp) cd /usr/lib/python2.6/site-packages ;;
+        dj) cd /usr/local/src/django ;;
+        p) cd ~/projects ;;
+    esac
+}
+</code></pre>
+<p>This gives you a command called goto, so you can enter your site-packages folder by typing &ldquo;goto sp<!-- raw HTML omitted -->&rdquo;</p>
+<p>For more flexibility in your &ldquo;goto&rdquo; script, it may be worth it to write it in a more powerful language, such as Python. In this example, we are embedding python code into a bash function:</p>
+<pre><code>function goto { $(python &lt;&lt;&lt; &quot;
+alias = '$1'
+targets = {
+    'p': '/home/cody/projects/',
+    'dj': '/usr/local/src/django/',
+}
+try:
+    # anything we print gets executed in the current bash environment
+    print('cd %s' % targets[alias])
+except KeyError:
+    print('echo Target not found')
+&quot;); }
+</code></pre>
+<p>Because we are working in Python now, we can easily modify our script to be database-backed or use a simple configuration file to store &ldquo;targets&rdquo; (aliased directories). Of course, with greater complexity, it would be cleaner to move the python code to a separate file and strip down the bash function to just:</p>
+<pre><code>function goto { $(python /home/cody/bin/goto.py $*); }
+</code></pre>
+<h2 id="a-different-solution-with-python">A Different Solution with Python</h2>
+<p>This approach works, but is obviously hacky due to the fact that anything sent to stdout in python gets executed in bash. This makes it difficult to use something like optparse to provide arguments and help. Ideally, we could write something in pure python without having to source a bash script to change the working directory, but I have not found a way to do so. You can, however, use exit codes from python to instruct bash on whether to execute or print the output of the python script. This bash script demonstrates the use of exit codes (Note: this also must be sourced with &ldquo;.&rdquo;, &ldquo;source&rdquo; or by placing the source into ~/.bashrc):</p>
+<pre><code>function goto {
+    TEMPFILE=$(mktemp)
+    python /home/cody/bin/goto.py $* &gt; $TEMPFILE
+    EXIT_CODE=$?
+    if [ $EXIT_CODE == 10 ]; then
+        . $TEMPFILE
+    else
+        cat $TEMPFILE
+    fi
+}
+</code></pre>
+<p>Now we need to create our python file (goto.py). Note the use of &ldquo;exit(10).&rdquo; This is the exit code that gets picked up in our bash script as $?. Here we will use optparse to provide command line argument parsing. Now we will have a help menu (accessible with &ndash;help or -h) and a list-display of the available aliases (accessible with  -l or &ndash;list):</p>
+<pre><code>targets = {
+    'p': '/home/cody/projects/',
+    'dj': '/usr/local/src/django/',
+}
+
+import sys
+from optparse import OptionParser
+
+def execute_and_exit(command):
+    print(command)
+    # bash script uses return code as flag to execute command
+    exit(10)
+
+parser = OptionParser()
+parser.add_option('-l', '--list',
+    action='store_true', dest='display_list', default=False,
+    help='Display list of targets.')
+(options, args) = parser.parse_args()
+
+if options.display_list:
+    for name, path in targets.iteritems():
+        print('%s: %s%s' % (
+            name,
+            ''.join(' ' for i in range(5 - len(name))),
+            path
+        ))
+else:
+    alias = args[0]
+    try:
+        execute_and_exit('cd %s' % targets[alias])
+    except KeyError:
+        print('Target not found')
+</code></pre>
+<p>After moving the bash to a file called ~/bin/goto.sh and the python to a file called ~/bin/goto.py, we have a pretty useful alias program. Now we can do the following:</p>
+<pre><code>cody@laptop:~$ source ~/bin/goto.sh #alternatively add this line to your ~/.bashrc
+cody@laptop:~$ goto -h
+Usage: goto.py [options]
+
+Options:
+  -h, --help  show this help message and exit
+  -l, --list  Display list of targets.
+cody@laptop:~$ goto -l
+p:     /home/cody/projects/
+dj:    /usr/local/src/django/
+cody@laptop:~$ goto dj
+cody@laptop:/usr/local/src/django$ goto p
+cody@laptop:~/projects$ 
+</code></pre>
+<h2 id="other-things-from-bash">Other Things from Bash</h2>
+<p>There are also a few shortcuts in bash to re-enter directories that you have been in since you started your bash session. For example, if you are in your projects directory and you need to change to /tmp to do a quick task, you may re-enter your projects directory using:</p>
+<pre><code>cd -
+</code></pre>
+<p>This command always takes you back to the last directory you were in.</p>
+<p>There are also the little-known *nix commands pushd and popd. These commands build a directory stack, as illustrated by this example:</p>
+<pre><code>cody@laptop:/$ pushd .
+/ /
+cody@laptop:/$ cd ~
+cody@laptop:~$ pushd .
+~ ~ /
+cody@laptop:~$ cd /tmp
+cody@laptop:/tmp$ pushd .
+/tmp /tmp ~ /
+cody@laptop:/tmp$ popd
+/tmp ~ /
+cody@laptop:/tmp$ popd
+~ /
+cody@laptop:~$ popd
+/
+cody@laptop:/$ popd
+bash: popd: directory stack empty
+cody@laptop:/$ 
+</code></pre>
+<p>In this example, I move from /, to ~, to /tmp, and use popd to go back to each directory in reverse order.</p>
+<h2 id="history">History</h2>
+<p>In addition, Bash history provides a way to quickly run any command you&rsquo;ve run earlier in your session by typing CTRL-R followed by a few unique letters from the command you&rsquo;ve typed before. If I had ran the command &ldquo;cd /usr/lib/python2.6/site-packages&rdquo; several minutes ago, and I need to get back to my site-packages folder, I can type &ldquo;<!-- raw HTML omitted -->site<!-- raw HTML omitted -->&rdquo; and it will likely find the &ldquo;cd&rdquo; command in the Bash history (unless I had more recently typed a command with the word &ldquo;site&rdquo; in it, in which you can hit CTRL-R again to match commands further back in the history).</p>
+<p>Another bash trick that is very time-saving is to use ALT+. to repeat the last word of the last command typed. For example, say I&rsquo;m looking for a file, so I run:</p>
+<pre><code>ls ~/projects/python/codysoyland.com
+</code></pre>
+<p>After I see the file I&rsquo;m looking for, now I want to cd to the directory and start working, so I just type &ldquo;cd &quot; and hit ALT+. to insert the path I typed in the last command.</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

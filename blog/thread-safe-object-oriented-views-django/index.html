@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Thread-Safe Object-Oriented Views in Django &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/thread-safe-object-oriented-views-django/">Thread-Safe Object-Oriented Views in Django</a></h1>
+                <span class="post-date">2010-02-03 </span>
+                <div class="post-content">
+                    <p>An emerging design pattern in Django is the usage of class-based views. Writing views as classes is made possible by Python features that allow classes and objects to behave as callables, just like functions. They can help organize view code and promote reusability by offering a greater level of customization. However, callable objects sometimes have thread safety issues that developers are often not aware of.</p>
+<blockquote>
+<p><strong>Update 2/2/11:</strong> This post is now mostly irrelevant, because Django will soon solve this problem with the newly-refactored generic view module in Django 1.3, which is due for release this month. Since I wrote this post a year ago, massive arguments over the design of class-based views erupted on the mailing list. It definitely got out of hand, but a lot was learned, and I&rsquo;m happy with the solution that was committed. I still encourage people to understand how to avoid threading side-effects. I would also suggest reading the <a href="http://docs.djangoproject.com/en/dev//topics/class-based-views/">new documentation on class-based generic views</a>.</p>
+</blockquote>
+<hr>
+<p>The most common approach to class-based views is to create a callable object, a class that has been written with a __call__ method, therefore making instances of the class callable. The view is instantiated either as a module-level variable in the views file or in the urlconf. Jacob Kaplan-Moss has written <a href="http://github.com/jacobian/django/tree/class-based-generic-views/django/views/generic2/">a series of class-based generic views</a> that follow this model.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>When writing persistent class-based views, you must be careful not to introduce stateful information in your object. From what I can tell, Jacob&rsquo;s implementation seems thread-safe, because the view&rsquo;s state appears to only be altered on initialization. The problem arises when you store request-specific variables on the view object. Because the object is only instantiated once per Python process, it persists while running multiple HTTP requests, for the life of the process. Stateful information can cause side effects including security problems.</p>
+<p>Here is a simple example illustrating this effect:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyView</span>(object):
+        thing <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+        <span style="color:#66d9ef">def</span> __call__(self, request):
+            self<span style="color:#f92672">.</span>thing <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+            <span style="color:#66d9ef">return</span> HttpResponse(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> (self<span style="color:#f92672">.</span>thing,))
+
+    my_view <span style="color:#f92672">=</span> MyView()
+</code></pre></div><p>URL patterns:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    urlpatterns <span style="color:#f92672">=</span> patterns(<span style="color:#e6db74">&#39;&#39;</span>,
+        url(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^my_view/$&#39;</span>, <span style="color:#e6db74">&#39;my_app.views.my_view&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;my_view&#39;</span>),
+    )
+</code></pre></div><p>Every time you refresh your browser, you will see a number incrementing. Even in single-threaded (prefork) environments, this bug is present. Multi-threaded environments are succeptible to even scarier problems with object state. For example, you might be tempted to set the request object as an attribute to the view class:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyView</span>(object):
+        <span style="color:#66d9ef">def</span> __call__(self, request):
+            self<span style="color:#f92672">.</span>request <span style="color:#f92672">=</span> request
+            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>create_response()
+
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_response</span>(self):
+            <span style="color:#66d9ef">return</span> HttpResponse(<span style="color:#e6db74">&#39;Welcome, </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> (self<span style="color:#f92672">.</span>request<span style="color:#f92672">.</span>user,))
+
+    my_view <span style="color:#f92672">=</span> MyView()
+</code></pre></div><p>If a view is called twice at roughly the same time in two threads, the request object may be incorrect in one of the threads, because the view object is shared between the threads. This bug might manifest seldomly, but it would be difficult to track down and conceivably a security problem.</p>
+<h2 id="reducing-shared-state">Reducing shared state</h2>
+<p>If you are having thread safety issues because of class-based views, the first thing you can do is enable a prefork worker module in your web server. This causes greater memory usage, but it creates new processes instead of threads to handle concurrency. This is only a workaround, however, and there are ways to maintain thread-safe code using class-based views. A quick fix for a code base that already suffers from this bug would be to drop in __new__ method that handles the creation of new view instances per request. This should be as simple as adding the following to your view class:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#66d9ef">def</span> __new__(cls, <span style="color:#f92672">*</span>args_static, <span style="color:#f92672">**</span>kwargs_static):
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">view_wrapper</span>(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            view <span style="color:#f92672">=</span> object<span style="color:#f92672">.</span>__new__(cls)
+            view<span style="color:#f92672">.</span>__init__(<span style="color:#f92672">*</span>args_static, <span style="color:#f92672">**</span>kwargs_static)
+            <span style="color:#66d9ef">return</span> view(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+        <span style="color:#66d9ef">return</span> view_wrapper
+</code></pre></div><p>If this is added to MyView above, it magically becomes thread-safe because the view is wrapped in such a way that every time it gets called, a new MyView instance is created for the request.</p>
+<p>This method may be useful for existing apps, but a better designed stateful class-based view might drop the usage of __call__ altogether in favor of using a class (not an instance) as the view itself.</p>
+<p>Michael Malone <a href="http://code.djangoproject.com/ticket/6735#comment:37">suggested in this Django ticket</a> using __init__ as an alternative to __call__. By subclassing HttpResponse, you can treat the class as a view because calling the class creates an HttpResponse object. This creates a new view object for every request coming in. His suggestion did not appeal to me because you lose control over the resulting HttpResponse object and it&rsquo;s not possible to instantiate the view without creating an HttpResponse object. An alternative I&rsquo;ve come up with is to override __new__ to return an HttpResponse.</p>
+<h2 id="creating-the-response-in-__new__">Creating the response in __new__</h2>
+<p>Remember that any callable can be used as a view. This can mean functions, callable objects, and even classes. When you call a class, it&rsquo;s __new__ method is called and returns something, usually an instance of that class. However, it can be anything you want, including an HttpResponse object. A new approach to thread-safe classed-based views might be something like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BaseView</span>(object):
+        <span style="color:#66d9ef">def</span> __new__(cls, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            view <span style="color:#f92672">=</span> cls<span style="color:#f92672">.</span>new(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+            <span style="color:#66d9ef">return</span> view<span style="color:#f92672">.</span>create_response()
+
+        <span style="color:#a6e22e">@classmethod</span>
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">new</span>(cls, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            obj <span style="color:#f92672">=</span> object<span style="color:#f92672">.</span>__new__(cls)
+            obj<span style="color:#f92672">.</span>__init__(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+            <span style="color:#66d9ef">return</span> obj
+
+        <span style="color:#66d9ef">def</span> __init__(self, request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">NotImplementedError</span>()
+
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_response</span>(self):
+            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">NotImplementedError</span>()
+
+    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyView</span>(BaseView):
+        template <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;path/to/template.html&#39;</span>
+
+        <span style="color:#66d9ef">def</span> __init__(self, request):
+            self<span style="color:#f92672">.</span>request <span style="color:#f92672">=</span> request
+
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_response</span>(self):
+            <span style="color:#66d9ef">return</span> render_response(self<span style="color:#f92672">.</span>request, self<span style="color:#f92672">.</span>template, {<span style="color:#e6db74">&#39;title&#39;</span>: <span style="color:#e6db74">&#39;Home&#39;</span>})
+</code></pre></div><p>This would be added to your URLPatterns directly (no need to instantiate it):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    urlpatterns <span style="color:#f92672">=</span> patterns(<span style="color:#e6db74">&#39;&#39;</span>,
+        url(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^my_view/$&#39;</span>, <span style="color:#e6db74">&#39;my_app.views.MyView&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;my_view&#39;</span>),
+    )
+</code></pre></div><p>A key difference is that the view is not a subclass of HttpResponse, but when you attempt to instantiate it, it will create an HttpResponse. In case you want to create a view object for testing or otherwise, the BaseView class has a factory method called &ldquo;new&rdquo; that makes new view instances.</p>
+<p>The main thing to get out of all of this is that you need to be careful and aware of shared state whenever it exists. I prefer to minimize the possibility of side effects by avoiding module-level variables, singletons, and globals as they are almost always the road to hell. But if you do have a persistent view object, make sure that you don&rsquo;t store request-specific data on it.</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

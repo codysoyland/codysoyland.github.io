@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> SSH tip: Automatic Reverse Tunnels for Workflow Simplification &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/ssh-tip-automatic-reverse-tunnels-workflow-simplif/">SSH tip: Automatic Reverse Tunnels for Workflow Simplification</a></h1>
+                <span class="post-date">2010-06-06 </span>
+                <div class="post-content">
+                    <p>I came up with a trick today to simplify the workflow of certain tasks with SSH. The problem this solves is largely driven by a particular annoyance I had with remote SSH file management. Consider the following workflow for locating a remote file and copying it back to the local machine:</p>
+<pre><code># Find the remote file:
+local:~$ ssh remote
+remote:~$ find . -name 'file.tar.gz'
+/home/cody/somewhere/deep/file.tar.gz
+
+# Ah, there it is! Now I want to copy it back to my local machine.
+# Pop open a new shell to my local machine in a separate tab and copy the file with scp:
+local:~$ scp remote:/home/cody/somewhere/deep/file.tar.gz .
+</code></pre>
+<p>The reason I have to run scp on my local machine is because it is behind a firewall, so the remote machine can&rsquo;t see it directly. Ideally, I could just run &ldquo;scp file.tar.gz local:&rdquo; from the remote machine, but SSH wouldn&rsquo;t be able to resolve my home computer&rsquo;s IP address or be able to get to the port, as I am almost always behind a firewall. This workflow also breaks down when you need to run &ldquo;sudo&rdquo; on the remote machine to access the files. In this case, you might feel forced to create a temporary tarball remotely using sudo before copying it to the local machine.</p>
+<p>There is a way to get around this limitation with DNS/firewalls, and the answer is by using SSH reverse tunnels to bind your local SSH daemon port to a remote SSH alias. This can be accomplished in a simple manner by modifying your ~/.ssh/config on both the local and remote computers.</p>
+<p>On the local computer, the SSH configuration entry for the remote host should be given a RemoteForward option, specifying that localhost:22 (the local ssh daemon) should be tunnelled to remote port 8022:</p>
+<pre><code>Host remote
+HostName remote.example.com
+RemoteForward 8022 localhost:22
+</code></pre>
+<p>On the remote computer, an alias to the local computer is created, binding itself to the local SSH daemon:</p>
+<pre><code>Host local
+HostName 127.0.0.1
+Port 8022
+</code></pre>
+<p>Now, the local machine is transparently accessible from the remote machine, replacing the above workflow with something a little smoother:</p>
+<pre><code># Find the remote file:
+local:~$ ssh remote
+remote:~$ find . -name 'file.tar.gz'
+/home/cody/somewhere/deep/file.tar.gz
+
+# Don't go anywhere. Just copy it:
+remote:~$ scp /home/cody/somewhere/deep/file.tar.gz local:
+</code></pre>
+<p><strong>Update (6-8-2010):</strong> Some of the commenters have expressed security concerns regarding using SSH tunnels in this way. Please see the comments for more info (particularly <a href="#comment-55344640">this one</a>). Thanks to those who point out when I&rsquo;m wrong!</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Evaluating Django Caching Options &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/evaluating-django-caching-options/">Evaluating Django Caching Options</a></h1>
+                <span class="post-date">2010-01-17 </span>
+                <div class="post-content">
+                    <p>Caching is one of the first things you can do when you need to start thinking about scaling. Among efforts such as query minimization, denormalization, code optimizations, compression, database tuning, indexing, and load balancing, caching remains one of the lowest hanging fruits in methods to lighten your server load and handle huge amounts of traffic. There are many options, and I chose to evaluate a few of the most interesting setups.</p>
+<p>This is not intended to be a rigoriously scientific test, but more of a first impression of the different caching systems. For all the tests I&rsquo;m describing, I&rsquo;m using a single VPS on Rackspace Cloud with 320MB of RAM, a quad-core AMD Opteron 2350HE, and a bleeding edge server stack using Ubuntu Server 9.10, NGINX with UWSGI, Python 2.6, Django 1.1, and PostgreSQL 8.4. I&rsquo;m serving the home page view of Django-Mingus, which provides a realistic amount of complexity to the Python side of things and gives us a 9387 byte response. I&rsquo;m using 4 UWSGI processes and a single NGINX worker. All my tests are using ApacheBench, which I&rsquo;m running on the same machine. Note that for all my cache tests I&rsquo;m prepopulating the cache before running the benchmark. Here are the different setups I&rsquo;m going to evaluate:</p>
+<ol>
+<li>No caching whatsover.</li>
+<li>Django&rsquo;s template caching templatetag.</li>
+<li>Django&rsquo;s two-part caching middleware.</li>
+<li>NGINX Memcached module.</li>
+<li>On-disk caching with Django-staticgenerator.</li>
+<li>Varnish as front-end load-balancing cache.</li>
+</ol>
+<h2 id="no-caching">No Caching</h2>
+<p>For any content-driven website, this is probably the worst idea of them all, and as you&rsquo;ll find out, it is trivial to implement most of the above caching strategies. Clearly, my single server arrangement is not going to be representative of your large app server cluster, so I urge you to evaluate all the options if you are anticipating scaling. Finding the right recipe for your server setup is going to be the fun part.</p>
+<p>For the purpose of establishing a baseline, I ran ApacheBench on my setup with no caching turned on. I&rsquo;m running 10 concurrent requests for a 1000 requests using the following ApacheBench command:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">    $ ab -n <span style="color:#ae81ff">1000</span> -c <span style="color:#ae81ff">10</span> &lt;server-name&gt;
+</code></pre></div><p>Here&rsquo;s a snipped version of the results:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   68.619 seconds
+    Sent requests:          1000
+    Completed requests:     1000
+    Failed requests:        0
+    Total transferred:      9660000 bytes
+    HTML transferred:       9387000 bytes
+    Requests per second:    14.5732231597662
+    Transfer rate:          141.610400362873 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.12    10
+    Response:     309  681.65  1330
+</code></pre></div><p>It&rsquo;s probably possible to tune this for shorter latency, but we got the main number we were looking for; we can push <strong>14.57 requests/second</strong> without a cache. Not bad, until you get Slashdotted!</p>
+<h2 id="djangos-template-caching-templatetag">Django&rsquo;s template caching templatetag</h2>
+<p>Django provides an easy way to cache parts of your template using the <a href="http://docs.djangoproject.com/en/dev/topics/cache/#template-fragment-caching">&ldquo;cache&rdquo; template tag</a>. Here is an example of usage:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-jinja" data-lang="jinja">    <span style="color:#75715e">{%</span> <span style="color:#66d9ef">load</span> cache <span style="color:#75715e">%}</span>
+    <span style="color:#75715e">{%</span> <span style="color:#66d9ef">cache</span> <span style="color:#ae81ff">500</span> sidebar <span style="color:#75715e">%}</span>
+        This goes into cache.
+    <span style="color:#75715e">{%</span> <span style="color:#66d9ef">endcache</span> <span style="color:#75715e">%}</span>
+</code></pre></div><p>Django-Mingus makes good use of the cache template tag in the default templates. In this test, I enabled Memcache in Django and removed view caching so I could get an idea how segment caching affects performance. This page benefits from 10 template cache hits and 4 other Memcache hits used in some of Mingus&rsquo;s apps.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   26.19 seconds
+    Sent requests:          1000
+    Completed requests:     1000
+    Failed requests:        0
+    Total transferred:      9479000 bytes
+    HTML transferred:       9387000 bytes
+    Requests per second:    38.1825124093165
+    Transfer rate:          353.449253054601 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.29    10
+    Response:      90  260.61   490
+</code></pre></div><p>Enabling templatetag caching has given a significant speed boost to <strong>38.18 requests/second.</strong> This is a <strong>262% improvement</strong> over no cache. Response time is also improved, down from 682ms to an acceptable 260ms. Good, but there&rsquo;s still a lot of room for improvement.</p>
+<p>The subtle increase in performance shouldn&rsquo;t deter you from implementing the tag though, as template caching bears the benefit that one segment can be cached and used across multiple pages (for example, a sidebar that is the same on different parts of the site).</p>
+<h2 id="djangos-two-part-caching-middleware">Django&rsquo;s two-part caching middleware</h2>
+<p>Django comes <a href="http://docs.djangoproject.com/en/dev/topics/cache/#the-per-site-cache">equiped with middleware</a> that provides frontend proxy-style full page caching with almost no configuration. Full page caching is clearly where you&rsquo;re going to find the greatest benefits. Something like Squid, Varnish, or NGINX is better suited for this job, but the ease of setup makes this middleware useful for environments where a minimal amount of complexity is desired. Because of the greater performance, I&rsquo;m running 10,000 requests instead of 1,000 to get a better sample.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   9.07 seconds
+    Sent requests:          10000
+    Completed requests:     10000
+    Failed requests:        0
+    Total transferred:      130040000 bytes
+    HTML transferred:       127560000 bytes
+    Requests per second:    1102.53583241455
+    Transfer rate:          14001.3437155458 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.15    10
+    Response:       0    9.02   470
+</code></pre></div><p>This is about as fast as Django&rsquo;s going to run on this hardware without a more sophisticated caching proxy. We&rsquo;ve revved Django&rsquo;s internal caching to give us <strong>1103 requests/second</strong>, over 75 times as many as we had with no caching. However, we&rsquo;re still passing every request into Python, which gives us limits we cannot avoid without moving the caching layer into the frontend server. For this we&rsquo;ll need to explore NGINX or Varnish.</p>
+<h2 id="nginxs-memcached-module">NGINX&rsquo;s Memcached module</h2>
+<p>NGINX has <a href="http://wiki.nginx.org/NginxHttpMemcachedModule">a very nice caching feature</a> that most servers lack: it can serve an HTML document directly from Memcached without ever touching your Python code. Since we are already using NGINX, enabling the Memcached HTTP caching module was a trivial task. For this test, I will disable Django&rsquo;s caching middleware and add a custom cache update middleware that sets a cache key that NGINX can be configured to read. I used a modified version of the middleware from <a href="http://weichhold.com/2008/09/12/django-nginx-memcached-the-dynamic-trio/">Oliver Weichold&rsquo;s blog post on using Django with NGINX+Memcached.</a> Enabling the module in NGINX config was just adding a new location directive for Memcached and assigning the web app as a 404 handler for that location:</p>
+<p>Before:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx">    <span style="color:#66d9ef">location</span> <span style="color:#e6db74">/</span> {
+        <span style="color:#f92672">uwsgi_pass</span>  <span style="color:#e6db74">unix:///tmp/mingus.sock</span>;
+        <span style="color:#f92672">include</span>     <span style="color:#e6db74">uwsgi_params</span>;
+    }
+</code></pre></div><p>After:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx">    <span style="color:#66d9ef">location</span> <span style="color:#e6db74">/</span> {
+        <span style="color:#f92672">default_type</span>  <span style="color:#e6db74">text/html</span>;
+        <span style="color:#f92672">set</span> $memcached_key <span style="color:#e6db74">nginx.</span>$request_uri;
+        <span style="color:#f92672">memcached_pass</span> 127.0.0.1:<span style="color:#ae81ff">11211</span>;
+        <span style="color:#f92672">error_page</span> <span style="color:#ae81ff">404</span> = <span style="color:#e6db74">@cache_miss</span>;
+    }
+    <span style="color:#66d9ef">location</span> <span style="color:#e6db74">@cache_miss</span> {
+        <span style="color:#f92672">uwsgi_pass</span>  <span style="color:#e6db74">unix:///tmp/mingus.sock</span>;
+        <span style="color:#f92672">include</span>     <span style="color:#e6db74">uwsgi_params</span>;
+    }
+</code></pre></div><p>Running the same benchmark as above, here are my results:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   3.699 seconds
+    Sent requests:          10000
+    Completed requests:     10000
+    Failed requests:        0
+    Total transferred:      130640000 bytes
+    HTML transferred:       129190000 bytes
+    Requests per second:    2703.43336036767
+    Transfer rate:          34489.8959178156 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.36    30
+    Response:       0    3.66   109
+</code></pre></div><p>Now we&rsquo;re getting serious! I was serving <strong>2703 requests/second</strong> through memcache on my VPS. Now we&rsquo;re in Slashdotting territory. This is <strong>over 185 times</strong> as fast as vanilla Django. The important thing to note here is that we&rsquo;re accomplishing the same thing as Django&rsquo;s built-in two-part caching middleware, but now we are doing it <strong>2.5 times faster</strong>.</p>
+<h2 id="on-disk-caching-with-django-staticgenerator">On-disk caching with django-staticgenerator</h2>
+<p>Another approach is to use on-disk caching techniques to serve static files. This is made possible with <a href="http://superjared.com/projects/static-generator/">django-staticgenerator</a>, which has middleware that generates flat files that NGINX can serve directly. It was simple to set up, and here are my results:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   2.78 seconds
+    Sent requests:          10000
+    Completed requests:     10000
+    Failed requests:        0
+    Total transferred:      131320000 bytes
+    HTML transferred:       129190000 bytes
+    Requests per second:    3597.12230215827
+    Transfer rate:          46130.2832733813 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.67    90
+    Response:       0    2.66   190
+</code></pre></div><p>Now we&rsquo;re rocking <strong>3597 requests/second</strong>. NGINX can serve static files like nobody&rsquo;s business.</p>
+<h2 id="varnish">Varnish</h2>
+<p><a href="http://varnish.projects.linpro.no/">Varnish</a> is a very powerful load balancing caching proxy that is made for heavy traffic. I&rsquo;m configuring it as an HTTP proxy to my NGINX server to see how it stacks up.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    Concurrency Level:      10
+    Time taken for tests:   2.76 seconds
+    Sent requests:          10000
+    Completed requests:     10000
+    Failed requests:        0
+    Total transferred:      131230000 bytes
+    HTML transferred:       129190000 bytes
+    Requests per second:    3623.1884057971
+    Transfer rate:          46432.716259058 kb/s received
+
+    Connnection Times (ms)
+                  min     avg   max
+    Connect:        0    0.60    20
+    Response:       0    2.74    90
+</code></pre></div><p>Varnish is very competitive in raw speed, serving <strong>3623 requests/second</strong>, an impressive number, <strong>nearly 250 times higher than if there was no cache.</strong> Varnish is also very configurable and built for extremely high traffic.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Every scaling problem has its own variables that can greatly affect the types of decisions that need to be made to implement a good caching stategy. For example, a multi-server setup is likely to behave much different given the same benchmarks. There are also more complicated factors such as how to treat logged-in users and cookies. There are workarounds for cookie hashing problems (such as removing the &ldquo;Vary: Cookie&rdquo; response header) that can add complexity to certain environments, so there is more to consider than raw performance.</p>
+<p>Also make note that not all of these are mutually exclusive. A good combination of caching might be internal template caching plus either Varnish or NGINX acting as a frontend cache. My best suggestion is to experiment and see what works best for your environment, and I hope this post was helpful for summarizing your options.</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

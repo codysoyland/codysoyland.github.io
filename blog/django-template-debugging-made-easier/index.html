@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Django Template Debugging Made Easier with django-template-repl &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/django-template-debugging-made-easier/">Django Template Debugging Made Easier with django-template-repl</a></h1>
+                <span class="post-date">2009-12-13 </span>
+                <div class="post-content">
+                    <p>When working with the Django template language, specifically writing template tags or trying out new template tags that are not well documented, it&rsquo;s easy to fall into a testing loop that involves modifying your code, saving the file, causing runserver to restart, which could take some time for large projects, switching to your web browser, hitting reload, and viewing the results. This workflow can be repetitive and unproductive. I decided to improve template interpreter interactivity by writing a REPL for it, and I released the project as django-template-repl, which is freely available on Github and PyPI. I was surprised and happy to see it was well accepted judging from the twitter chatter and github statistics, so I wrote this to better explain how to use it.</p>
+<p>One of the greatest advantages of Python, Lisp, and other programming languages is the ease of debugging and understanding code behavior provided by REPLs. A REPL, which stands for Read-Eval-Print Loop, is a shell that gives you an interactive command line session with your language interpreter. The two REPLs most Django users should be familiar with are ipython and (i)pdb. These tools are incredibly helpful and really boost the usability of Python. I spend more time inside ipdb than I read code output in a web browser. <a href="http://github.com/codysoyland/django-template-repl">django-template-repl</a> provides this type of tool for the <a href="http://www.djangoproject.com/">Django</a> template language.</p>
+<h2 id="invoking-the-repl">Invoking the REPL</h2>
+<p>There are two ways to invoke the REPL. One uses a management command and the other uses a template tag. Run &ldquo;python manage.py templateshell&rdquo; to open the REPL:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">    $ python manage.py templateshell
+    &gt;&gt;&gt; test
+    test
+    &gt;&gt;&gt; <span style="color:#f92672">{</span>% <span style="color:#66d9ef">if</span> <span style="color:#ae81ff">1</span> %<span style="color:#f92672">}</span>
+    ... It is true!
+    ... <span style="color:#f92672">{</span>% <span style="color:#66d9ef">else</span> %<span style="color:#f92672">}</span>
+    ... It is false!
+    ... <span style="color:#f92672">{</span>% endif %<span style="color:#f92672">}</span>
+
+    It is true!
+</code></pre></div><p>This behaves almost exactly like a python shell. It uses the readline library, so it handles command history. It also detects when you are inside a block tag, giving you decent multi-line support.</p>
+<h2 id="providing-context">Providing context</h2>
+<p>Context can be provided in a number of ways. You can pass a context dictionary with the command-line, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">    $ python manage.py templateshell --context <span style="color:#e6db74">&#34;{&#39;testvar&#39;: &#39;this is a string&#39;}&#34;</span>
+    &gt;&gt;&gt; <span style="color:#f92672">{{</span> testvar <span style="color:#f92672">}}</span>
+    this is a string
+</code></pre></div><p>Note that this actually runs eval() on the context string. That&rsquo;s the first time I&rsquo;ve ever used eval(), but it seems not so hacky for this purpose.</p>
+<p>Context can also be extracted from a specific URL in your project. This is accomplished by using Django&rsquo;s test client to capture context used in a page and bootstrap a REPL with the captured context. For example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">    $ python manage.py templateshell --url /admin/
+    &gt;&gt;&gt; <span style="color:#f92672">{{</span> title <span style="color:#f92672">}}</span>
+    Log in
+    &gt;&gt;&gt; <span style="color:#f92672">{{</span> user <span style="color:#f92672">}}</span>
+    AnonymousUser
+</code></pre></div><p>If you need to capture context at a specific place in your page, like in a for loop, you can use the {% repl %} template tag. This will halt the template rendering process at a specific point and replace your runserver shell with a template REPL loaded with the context used in the calling template.</p>
+<h2 id="use-the-same-tools-with-pdb">Use the same tools with PDB</h2>
+<p>The management command and template tag give you nice ways to capture context, so I&rsquo;ve made it possible to use pdb or ipdb with them. The management command has an option, &ndash;pdb. If used in conjunction with &ndash;url or &ndash;context, you can load context into a PDB shell. For example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">    $ python manage.py templateshell --url /admin/ --pdb
+    ...
+    ipdb&gt; vars
+    Out<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>: 
+    <span style="color:#f92672">[</span><span style="color:#e6db74">&#39;app_path&#39;</span>,
+     <span style="color:#e6db74">&#39;error_message&#39;</span>,
+     <span style="color:#e6db74">&#39;root_path&#39;</span>,
+     <span style="color:#e6db74">&#39;title&#39;</span>,
+     <span style="color:#e6db74">&#39;MEDIA_URL&#39;</span>,
+     <span style="color:#e6db74">&#39;LANGUAGES&#39;</span>,
+     <span style="color:#e6db74">&#39;LANGUAGE_BIDI&#39;</span>,
+     <span style="color:#e6db74">&#39;LANGUAGE_CODE&#39;</span>,
+     <span style="color:#e6db74">&#39;perms&#39;</span>,
+     <span style="color:#e6db74">&#39;messages&#39;</span>,
+     <span style="color:#e6db74">&#39;user&#39;</span><span style="color:#f92672">]</span>
+    ipdb&gt; title
+    Out<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>: u<span style="color:#e6db74">&#39;Log in&#39;</span>
+    ipdb&gt; user
+    Out<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>: &lt;django.contrib.auth.models.AnonymousUser object at 0x1019d7490&gt;
+</code></pre></div><p>This functionality is also possible with the template tag, using {% repl pdb %}.</p>
+<p>I do hope these tools help somebody out. I feel like it is much easier to debug issues with template context and try new template tags. If you want to try it out, just run <code>pip install django-template-repl</code> and add &lsquo;template_repl&rsquo; to your installed apps.</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

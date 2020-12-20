@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Evented Django part one: Socket.IO and gevent &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/">Evented Django part one: Socket.IO and gevent</a></h1>
+                <span class="post-date">2011-02-06 </span>
+                <div class="post-content">
+                    <p>The buzz around the asynchronous, real-time web has been getting more and more attention lately, and for good reason. The old paradigm of thick servers and thin clients is getting outdated as the new web demands rich, fast, asynchronous, full-duplex messaging. The technologies that enable server-to-browser asynchronous messaging have been given the umbrella term &ldquo;Comet,&rdquo; and the number of ways to provide Comet services is growing constantly. The transport options include XHR-multipart, WebSockets, and Adobe Flash Sockets, among others. Socket.IO was invented to provide a unified interface for server-browser messaging and let the developer not worry about the inconsistent browser support. In this post, I&rsquo;m going to explain how to use Django with Socket.IO.</p>
+<p>Socket.IO was developed with a <a href="http://nodejs.org/">Node.JS</a> server implementation, but work is being done to add server implementations to a variety of languages. Two such servers exist for Python, <a href="https://github.com/MrJoes/tornadio">tornadio</a> and <a href="https://bitbucket.org/Jeffrey/gevent-socketio">gevent-socketio</a>. I&rsquo;m a big fan of gevent, so I will use gevent-socketio, but tornadio looks well-written and very promising.</p>
+<h2 id="why-you-should-be-thinking-about-gevent">Why you should be thinking about gevent</h2>
+<p>Socket.IO runs great under Node.JS, but I think it&rsquo;s important to highlight why I think Python and gevent need more attention (feel free to skip ahead if you have already drank the gevent koolaid). Node.JS (and its underlying V8 Javascript engine) is a pinnacle achievement for the world of Javascript. It has done two especially important things: it helped show the world that evented application servers enable extremely fast high-concurrency connections, and it helped promote Javascript as a serious language, opening the doors for powerful tools such as <a href="https://github.com/chrisdickinson/platoon">testing frameworks</a>, <a href="http://npmjs.org/">a package manager</a>, and better community code standards. Its popularity is not surprising: it&rsquo;s built on top of one of the world&rsquo;s most well-known programming languages.</p>
+<p>The Python community is a bit more fragmented, with several concurrent networking libraries &ndash; among them: twisted, tornado, gevent, eventlet, and concurrence. It&rsquo;s certainly harder to know where to start without a &ldquo;clear winner&rdquo; like we see in the Javascript community. Personally, gevent has quickly become my favorite way to write asynchronous applications. I think Python with gevent wins over Node.JS in two important ways:</p>
+<ol>
+<li>It&rsquo;s Python, a sane and concise language with an awesome standard library and community.</li>
+<li>It uses <a href="http://packages.python.org/greenlet/">greenlets</a> instead of callbacks to provide concurrency.</li>
+</ol>
+<p>Gevent, <!-- raw HTML omitted -->like Node.JS,<!-- raw HTML omitted --> is built on libevent (<em>Update: Node actually uses libev. Thanks to Travis Cline for correcting me there</em>), an underlying C library that provides a high-speed event loop. Node&rsquo;s concurrency model relies on callbacks to handle values from asynchronous I/O calls. This, combined with Javascript&rsquo;s highly nestable syntax, begs programmers to nest functions within other function calls, making callback passing a piece of cake, but I&rsquo;ve seen this produce ugly, unreadable nested code, and I&rsquo;ve seen programmers pull their hair out while trying to get things synchronized and avoid race conditions. In my experience, debugging an app with heavy use of callbacks is nearly impossible. Greenlet changes the game, because you can write simple &ldquo;blocking&rdquo; code that only blocks the current greenlet instead of the entire interpreter, allowing you to maintain stacks, along with beautiful Python stack traces.</p>
+<h2 id="running-django-on-gevent-socketio">Running Django on gevent-socketio</h2>
+<p>Gevent-socketio comes with one important caveat: you must use the gevent pywsgi server. This means you can&rsquo;t serve your WSGI app out of Apache like you might be used to doing (however, it should be possible to proxy requests from a front-end load balancer, but I haven&rsquo;t experimented with proxying web sockets). There&rsquo;s a pretty good reason for this: WSGI doesn&rsquo;t inherently allow web sockets. The only way this is possible is by hooking into the raw socket using the hooks provided by the pywsgi server.</p>
+<p>Gevent-socketio works by creating a SocketIO handler and adding it to the WSGI &ldquo;environ&rdquo; dictionary before executing your WSGI app. When Django handles a request, it creates a WSGIRequest object and assigns it the environ dictionary created by pywsgi. So, if we are running Django under gevent-socketio, our SocketIO handler is available by accessing &ldquo;request.environ[&lsquo;socketio&rsquo;]&rdquo;. I&rsquo;ve demonstrated this by porting the <a href="https://bitbucket.org/Jeffrey/gevent-socketio/src/5a0c6e249a9f/examples/">gevent-socketio example chatroom application</a> to Django. My ported code is <a href="http://github.com/codysoyland/django-socketio-example">available on Github</a>.</p>
+<h2 id="installation">Installation</h2>
+<p>I always choose to work in virtualenv, and I&rsquo;ve created a pip requirements file that should cover what you need to get started. To run my example, clone the code on Github and install the requirements from pip:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">git clone git://github.com/codysoyland/django-socketio-example.git
+cd django-socketio-example
+easy_install pip
+pip install virtualenv
+virtualenv .
+source ./bin/activate
+pip install -r pip_requirements.txt
+</code></pre></div><p>Note the contents of pip_requirements.txt: I&rsquo;m using the &ldquo;tip&rdquo; versions of both gevent-websocket and gevent-socketio. This is still beta-quality software, so we are using development versions. <strong>Note: Expect bugs!</strong></p>
+<h2 id="a-chat-server-request-handler">A chat server request handler</h2>
+<p>The Socket.IO calls come in like normal requests and can be handled by a view, but your view code can actually contain a long-running event loop, sending and receiving messages from your web client. Here is the view that handles Socket.IO requests:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
+
+buffer <span style="color:#f92672">=</span> []
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">socketio</span>(request):
+    socketio <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>environ[<span style="color:#e6db74">&#39;socketio&#39;</span>]
+    <span style="color:#66d9ef">if</span> socketio<span style="color:#f92672">.</span>on_connect():
+        socketio<span style="color:#f92672">.</span>send({<span style="color:#e6db74">&#39;buffer&#39;</span>: buffer})
+        socketio<span style="color:#f92672">.</span>broadcast({<span style="color:#e6db74">&#39;announcement&#39;</span>: socketio<span style="color:#f92672">.</span>session<span style="color:#f92672">.</span>session_id <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; connected&#39;</span>})
+
+    <span style="color:#66d9ef">while</span> True:
+        message <span style="color:#f92672">=</span> socketio<span style="color:#f92672">.</span>recv()
+
+        <span style="color:#66d9ef">if</span> len(message) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>:
+            message <span style="color:#f92672">=</span> message[<span style="color:#ae81ff">0</span>]
+            message <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;message&#39;</span>: [socketio<span style="color:#f92672">.</span>session<span style="color:#f92672">.</span>session_id, message]}
+            buffer<span style="color:#f92672">.</span>append(message)
+            <span style="color:#66d9ef">if</span> len(buffer) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">15</span>:
+                <span style="color:#66d9ef">del</span> buffer[<span style="color:#ae81ff">0</span>]
+            socketio<span style="color:#f92672">.</span>broadcast(message)
+        <span style="color:#66d9ef">else</span>:
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> socketio<span style="color:#f92672">.</span>connected():
+                socketio<span style="color:#f92672">.</span>broadcast({<span style="color:#e6db74">&#39;announcement&#39;</span>: socketio<span style="color:#f92672">.</span>session<span style="color:#f92672">.</span>session_id <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; disconnected&#39;</span>})
+                <span style="color:#66d9ef">break</span>
+
+    <span style="color:#66d9ef">return</span> HttpResponse()
+</code></pre></div><p>The view is plugged into your site like any other view:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    urlpatterns <span style="color:#f92672">+=</span> patterns(<span style="color:#e6db74">&#39;views&#39;</span>,
+        (<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^socket\.io&#39;</span>, <span style="color:#e6db74">&#39;socketio&#39;</span>),
+    )
+</code></pre></div><h2 id="running-the-example">Running the example</h2>
+<p>Run the example by starting the server:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">./run_example.py
+</code></pre></div><p>Then point your browser to http://localhost:9000/.</p>
+<p>If you run the example, you should see the same result as running the gevent-socketio example: a multi-client chatroom. The beauty of greenlet is at play in the line containing &ldquo;socketio.recv()&rdquo;. This line blocks the greenlet and allows the server to keep processing other requests until a new Socket.IO message is ready to be processed. As soon as a new message is ready, the greenlet is re-awakened and the message is processed.</p>
+<p>Note that we can&rsquo;t use our good old friend &ldquo;./manage.py runserver&rdquo; for this example. This is because we need to run the SocketIO server, which we import from gevent-socketio. Here is the example runner:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+
+PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">9000</span>
+
+<span style="color:#f92672">import</span> os
+
+os<span style="color:#f92672">.</span>environ[<span style="color:#e6db74">&#39;DJANGO_SETTINGS_MODULE&#39;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;settings&#39;</span>
+
+<span style="color:#f92672">import</span> django.core.handlers.wsgi
+application <span style="color:#f92672">=</span> django<span style="color:#f92672">.</span>core<span style="color:#f92672">.</span>handlers<span style="color:#f92672">.</span>wsgi<span style="color:#f92672">.</span>WSGIHandler()
+
+<span style="color:#f92672">from</span> socketio <span style="color:#f92672">import</span> SocketIOServer
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    <span style="color:#66d9ef">print</span> <span style="color:#e6db74">&#39;Listening on port </span><span style="color:#e6db74">%s</span><span style="color:#e6db74"> and on port 843 (flash policy server)&#39;</span> <span style="color:#f92672">%</span> PORT
+    SocketIOServer((<span style="color:#e6db74">&#39;&#39;</span>, PORT), application, resource<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;socket.io&#34;</span>)<span style="color:#f92672">.</span>serve_forever()
+</code></pre></div><p>This is all it takes to hook up gevent-socketio to the Django WSGIHandler. A monkey could easily make this into a custom management command if we desired.</p>
+<h2 id="further-reading">Further reading</h2>
+<p>In my next post, I will explain how to scale our chatroom example to multiple web servers using ZeroMQ. Until then, I recommend checking out the following resources:</p>
+<ul>
+<li><a href="http://socket.io/">Socket.IO</a></li>
+<li><a href="http://packages.python.org/greenlet/">greenlet</a></li>
+<li><a href="http://www.gevent.org/">gevent</a></li>
+<li><a href="http://www.gelens.org/code/gevent-websocket/">gevent-websocket</a></li>
+<li><a href="https://bitbucket.org/Jeffrey/gevent-socketio">gevent-socketio</a></li>
+</ul>
+<p>I would like to extend a special thanks to <a href="http://www.gelens.org/">Jeffrey Gelens</a> and other contributors for writing gevent-websocket and gevent-socketio.</p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>

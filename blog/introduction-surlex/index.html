@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Introduction to Surlex &middot; Cody Soyland </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.79.0" />
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="http://blog.codysoyland.com/css/nix.css">
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Inconsolata%7COpen+Sans%7CRubik" rel="stylesheet">
+
+
+
+
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+      <a class="navbar-brand" id="green-terminal" href='http://blog.codysoyland.com/'>
+        cody@codysoyland.com ~ $
+      </a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href='http://blog.codysoyland.com/'>/home/cody</a>
+        </li>
+        
+				
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/about">~/about</a>
+            		
+        		</li>
+        		
+				
+				<li class="dropdown">
+                    
+            		<a href="http://blog.codysoyland.com/blog">~/blog</a>
+            		
+        		</li>
+        		
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="flex-wrapper">
+            <div class="container wrapper">
+                <h1><a href="http://blog.codysoyland.com/blog/introduction-surlex/">Introduction to Surlex</a></h1>
+                <span class="post-date">2009-09-06 </span>
+                <div class="post-content">
+                    <p>Surlex (Simple URL Expression) is a language for matching and extracting text, similar to regex (regular expression). It works by generating a regular expression from a more concise syntax that is designed to produce easy-to-read url patterns.</p>
+<h2 id="installation">Installation</h2>
+<p>Surlex is indexed in PyPI, so it can be installed via pip or easy_install:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    pip install surlex
+</code></pre></div><p>Alternatively, the source code repository is available via git:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    git clone git://github.com/codysoyland/surlex.git
+</code></pre></div><h2 id="basic-capturing">Basic Capturing</h2>
+<p>A capture is performed by enclosing a variable name inside angle brackets:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    &lt;name&gt;
+</code></pre></div><p>This is equivalent to the following regex:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    (?P&lt;name&gt;.+) 
+</code></pre></div><p>A usage example for matching a blog index view is:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/&lt;year&gt;/
+</code></pre></div><p>This is equivalent to the following regex:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/(?P&lt;year&gt;.+)/
+</code></pre></div><p>This surlex would match the following URLs:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/2008/
+    /blog/2009/
+</code></pre></div><p>To invoke the capture in our source code we can use the Surlex class or the match function:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#f92672">from</span> surlex <span style="color:#f92672">import</span> Surlex, match
+
+    surlex <span style="color:#f92672">=</span> Surlex(<span style="color:#e6db74">&#39;/blog/&lt;year&gt;/&#39;</span>) <span style="color:#75715e"># returns surlex object</span>
+    surlex<span style="color:#f92672">.</span>match(<span style="color:#e6db74">&#39;/blog/2009/&#39;</span>) <span style="color:#75715e"># returns {u&#39;year&#39;: &#39;2009&#39;}</span>
+
+    match(<span style="color:#e6db74">&#39;/blog/&lt;year&gt;/&#39;</span>, <span style="color:#e6db74">&#39;/blog/2009/&#39;</span>) <span style="color:#75715e"># returns {u&#39;year&#39;: &#39;2009&#39;}</span>
+    match(<span style="color:#e6db74">&#39;/blog/&lt;year&gt;/&lt;month&gt;/&#39;</span>, <span style="color:#e6db74">&#39;/blog/2009/09/&#39;</span>) <span style="color:#75715e"># returns {u&#39;year&#39;: &#39;2009&#39;, u&#39;month&#39;: &#39;09&#39;}</span>
+</code></pre></div><h2 id="advanced-capturing-with-embedded-regex">Advanced Capturing with Embedded Regex</h2>
+<p>Surlex allows you to insert custom regex strings inside your surlex by postfixing the capture name with the equals sign (<code>=</code>) followed by a regular expression:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#f92672">from</span> surlex <span style="color:#f92672">import</span> surlex_to_regex
+    surlex_to_regex(<span style="color:#e6db74">&#39;&lt;number=[0-9]+&gt;&#39;</span>) <span style="color:#75715e"># returns (?P&lt;number&gt;[0-9]+)</span>
+</code></pre></div><p>The preceeding surlex will match &ldquo;2009&rdquo;, but not &ldquo;these-letters.&rdquo;</p>
+<p>If a right angle bracket is needed inside the regex, it may be escaped with a backslash.</p>
+<h2 id="surlex-macros-for-common-tasks">Surlex Macros for Common Tasks</h2>
+<p>Surlex includes a number of built-in macros which ease common tasks such as matching a slug or date string. They can be invoked by postfixing the capture name with a colon (<code>:</code>) followed by the name of the macro. One of the built-in macros matches a url slug and is identified by the letter &ldquo;s.&rdquo; A usage example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/&lt;year&gt;/&lt;month&gt;/&lt;slug:s&gt;/
+</code></pre></div><p>This will produce the following regular expression:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/(?P&lt;year&gt;.+)/(?P&lt;month&gt;.+)/(?P&lt;slug&gt;[\w-]+)/
+</code></pre></div><p>Here are all the built-in macros:</p>
+
+
+
+
+
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Macro</th>
+<th>Regex Equivalent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Y</td>
+<td><code>\d{4}</code></td>
+<td>year, including century</td>
+</tr>
+<tr>
+<td>y</td>
+<td><code>\d{2}</code></td>
+<td>year, not including century</td>
+</tr>
+<tr>
+<td>M</td>
+<td><code>(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)</code></td>
+<td>month, abbreviated</td>
+</tr>
+<tr>
+<td>m</td>
+<td><code>\d{1,2}</code></td>
+<td>month, 1 or 2 digit</td>
+</tr>
+<tr>
+<td>d</td>
+<td><code>\d{1,2}</code></td>
+<td>day, 1 or 2 digit</td>
+</tr>
+<tr>
+<td>#</td>
+<td><code>\d+</code></td>
+<td>number, any length</td>
+</tr>
+<tr>
+<td>s</td>
+<td><code>[\w-]+</code></td>
+<td>slug</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>A more complete example of a blog entry url might be defined as:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/&lt;year:Y&gt;/&lt;month:M&gt;/&lt;day:d&gt;/&lt;slug:s&gt;/
+</code></pre></div><p>This will produce the following regex:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">    /blog/(?P&lt;year&gt;\d{4})/(?P&lt;month&gt;(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))/(?P&lt;day&gt;\d{1,2})/(?P&lt;slug&gt;[\w-]+)/
+</code></pre></div><p>If matched against <code>/blog/2009/sep/06/surlex-released/</code>, it will produce the following dictionary:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    {
+            <span style="color:#e6db74">u</span><span style="color:#e6db74">&#39;year&#39;</span>: <span style="color:#e6db74">&#39;2009&#39;</span>,
+            <span style="color:#e6db74">u</span><span style="color:#e6db74">&#39;month&#39;</span>: <span style="color:#e6db74">&#39;sep&#39;</span>,
+            <span style="color:#e6db74">u</span><span style="color:#e6db74">&#39;day&#39;</span>: <span style="color:#e6db74">&#39;06&#39;</span>,
+            <span style="color:#e6db74">u</span><span style="color:#e6db74">&#39;slug&#39;</span>: <span style="color:#e6db74">&#39;surlex-released&#39;</span>,
+    }
+</code></pre></div><h2 id="custom-macros">Custom Macros</h2>
+<p>Custom surlex macros can be registered with the register_macro function. Here, we will register a macro to match an email address:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#f92672">from</span> surlex <span style="color:#f92672">import</span> register_macro, surlex_to_regex
+    surlex<span style="color:#f92672">.</span>register_macro(<span style="color:#e6db74">&#39;e&#39;</span>, <span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b&#39;</span>)
+    surlex<span style="color:#f92672">.</span>surlex_to_regex(<span style="color:#e6db74">&#39;/email-to/&lt;:e&gt;/&#39;</span>) <span style="color:#75715e"># returns /email-to/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/</span>
+</code></pre></div><h2 id="regex-and-macro-matching-without-capturing">Regex and Macro Matching without Capturing</h2>
+<p>If the name of the capture block is omitted, surlex will produce a regular expression that will match the given regex or macro without capturing, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    surlex_to_regex(<span style="color:#e6db74">&#39;&lt;=[0-9]+&gt;&#39;</span>) <span style="color:#75715e"># returns [0-9]+</span>
+    surlex_to_regex(<span style="color:#e6db74">&#39;&lt;:s&gt;&#39;</span>) <span style="color:#75715e"># returns [\w-]+</span>
+</code></pre></div><h2 id="optional-strings">Optional Strings</h2>
+<p>If a section of a surlex is enclosed in parentheses, it is considered optional and will allow the pattern to match even if it is not in the subject string. It is equivalent to enclosing an item in <code>()?</code> in regex. For example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    surlex_to_regex(<span style="color:#e6db74">&#39;/blog/(&lt;year&gt;/)&#39;</span>) <span style="color:#75715e"># returns /blog/((?P&lt;year&gt;.+)/)?</span>
+</code></pre></div><p>The preceeding surlex will match <code>/blog/</code> and <code>/blog/2009/</code>.</p>
+<h2 id="wildcards">Wildcards</h2>
+<p>Standard wildcards can be used with the asterisk (<code>*</code>):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    surlex_to_regex(<span style="color:#e6db74">&#39;/*.*&#39;</span>) <span style="color:#75715e"># returns &#34;/.*\..*&#34;, matches &#34;robots.txt&#34;, &#34;anything.html&#34;, etc</span>
+</code></pre></div><h2 id="matching-beginning-and-end-of-strings">Matching Beginning and End of Strings</h2>
+<p>The caret (<code>^</code>) and dollar (<code>$</code>) characters are preserved in the outputted regex, so they can still be used to match the start and end of strings:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    surlex_to_regex(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^only-this$&#39;</span>) <span style="color:#75715e"># returns &#39;^only-this$&#39;</span>
+</code></pre></div><h2 id="django-integration">Django Integration</h2>
+<p>Surlex can be used inside Django URLPatterns by importing the helper function and writing a standard urlpattern, substituting the regex for a surlex and the url function with surl:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">    <span style="color:#f92672">from</span> surlex.dj <span style="color:#f92672">import</span> surl
+    urlpatterns <span style="color:#f92672">=</span> patterns(<span style="color:#e6db74">&#39;&#39;</span>,
+        surl(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^blog/&lt;year:Y&gt;/&lt;month:M&gt;/&lt;day:d&gt;/&lt;slug:s&gt;/$&#39;</span>, blog<span style="color:#f92672">.</span>views<span style="color:#f92672">.</span>post_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;blog_post_detail&#39;</span>),
+    )
+</code></pre></div><p><strong>Update (4/12/2010)</strong>: I noticed a large surge of traffic from <a href="http://simonwillison.net/">Simon Willison&rsquo;s weblog</a> this morning and realized I left out links to the documentation and repository pages. <a href="http://codysoyland.com/projects/surlex/documentation/">Here is the documentation</a> and you can follow the <a href="http://github.com/codysoyland/surlex">project on Github.</a></p>
+
+                </div>
+                
+                <div class="post-comments">
+                    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codysoyland" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </div>
+                
+            </div>
+            <footer class="footer text-center">
+<p>Copyright &copy; 2020 Cody Soyland -
+<span class="credit">
+	Powered by
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+        </div>
+    </body>
