@@ -3,96 +3,96 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://blog.codysoyland.com/about/</loc>
+    <loc>http://www.codysoyland.com/about/</loc>
     <lastmod>2020-12-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/</loc>
+    <loc>http://www.codysoyland.com/blog/</loc>
     <lastmod>2013-02-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/</loc>
+    <loc>http://www.codysoyland.com/</loc>
     <lastmod>2013-02-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</loc>
+    <loc>http://www.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</loc>
     <lastmod>2013-02-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/django-gevent-djangocon-slides/</loc>
+    <loc>http://www.codysoyland.com/blog/django-gevent-djangocon-slides/</loc>
     <lastmod>2012-09-04T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</loc>
+    <loc>http://www.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</loc>
     <lastmod>2011-02-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</loc>
+    <loc>http://www.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</loc>
     <lastmod>2010-08-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/screencast-django-template-repl/</loc>
+    <loc>http://www.codysoyland.com/blog/screencast-django-template-repl/</loc>
     <lastmod>2010-02-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/thread-safe-object-oriented-views-django/</loc>
+    <loc>http://www.codysoyland.com/blog/thread-safe-object-oriented-views-django/</loc>
     <lastmod>2010-02-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/evaluating-django-caching-options/</loc>
+    <loc>http://www.codysoyland.com/blog/evaluating-django-caching-options/</loc>
     <lastmod>2010-01-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/django-template-debugging-made-easier/</loc>
+    <loc>http://www.codysoyland.com/blog/django-template-debugging-made-easier/</loc>
     <lastmod>2009-12-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/new-blog/</loc>
+    <loc>http://www.codysoyland.com/blog/new-blog/</loc>
     <lastmod>2009-12-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/building-search-pip/</loc>
+    <loc>http://www.codysoyland.com/blog/building-search-pip/</loc>
     <lastmod>2009-10-31T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</loc>
+    <loc>http://www.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</loc>
     <lastmod>2009-09-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/introduction-surlex/</loc>
+    <loc>http://www.codysoyland.com/blog/introduction-surlex/</loc>
     <lastmod>2009-09-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</loc>
+    <loc>http://www.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</loc>
     <lastmod>2009-09-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/blog/quick-directory-changing-linux/</loc>
+    <loc>http://www.codysoyland.com/blog/quick-directory-changing-linux/</loc>
     <lastmod>2009-06-15T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/categories/</loc>
+    <loc>http://www.codysoyland.com/categories/</loc>
   </url>
   
   <url>
-    <loc>https://blog.codysoyland.com/tags/</loc>
+    <loc>http://www.codysoyland.com/tags/</loc>
   </url>
   
 </urlset>
