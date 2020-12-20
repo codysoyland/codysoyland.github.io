@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Cody Soyland</title>
-    <link>http://www.codysoyland.com/</link>
+    <link>https://www.codysoyland.com/</link>
     <description>Recent content on Cody Soyland</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 28 Feb 2013 00:00:00 +0000</lastBuildDate><atom:link href="http://www.codysoyland.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 28 Feb 2013 00:00:00 +0000</lastBuildDate><atom:link href="https://www.codysoyland.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About Cody Soyland</title>
-      <link>http://www.codysoyland.com/about/</link>
+      <link>https://www.codysoyland.com/about/</link>
       <pubDate>Sun, 20 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/about/</guid>
+      <guid>https://www.codysoyland.com/about/</guid>
       <description>Hi, I&amp;rsquo;m Cody Soyland and I live in Austin, Texas.
 My professional passion is in software engineering, security, and DevOps. My every-growing list of hobbies includes mountain biking, backpacking, running, hydroponic gardening, baking/cooking, gaming/VR, home automation, and home improvement. I&amp;rsquo;m not too active on social media, but I sometimes share musings on Twitter and on my blog.
 I currently work for a company called Molecula where I am building software to power the next generation of data analytics.</description>
@@ -20,48 +20,48 @@ I currently work for a company called Molecula where I am building software to p
     
     <item>
       <title>Concurrent Python (AWPUG talk resources)</title>
-      <link>http://www.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</link>
+      <link>https://www.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</link>
       <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</guid>
+      <guid>https://www.codysoyland.com/blog/concurrent-python-awpug-talk-resources/</guid>
       <description>I&amp;rsquo;m doing a concurrency/gevent talk tonight at the Austin Web Python User Group. Slides and other resources are available here.
  Slides iPython Notebook gevent For the Working Python Developer A Curious on Coroutines and Concurrency, by David Beazley Concurrency is not Parallelism, by Rob Pike gevent gevent 1.0 downloads gevent-spider (recursive web-based web spider) Collaborative painting app source  </description>
     </item>
     
     <item>
       <title>Django on gevent Djangocon slides</title>
-      <link>http://www.codysoyland.com/blog/django-gevent-djangocon-slides/</link>
+      <link>https://www.codysoyland.com/blog/django-gevent-djangocon-slides/</link>
       <pubDate>Tue, 04 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/django-gevent-djangocon-slides/</guid>
+      <guid>https://www.codysoyland.com/blog/django-gevent-djangocon-slides/</guid>
       <description>Here are my slides from &amp;ldquo;Django on gevent&amp;rdquo;, my talk from Djangocon 2012.
 Slide link.</description>
     </item>
     
     <item>
       <title>Evented Django part one: Socket.IO and gevent</title>
-      <link>http://www.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</link>
+      <link>https://www.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</link>
       <pubDate>Sun, 06 Feb 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</guid>
+      <guid>https://www.codysoyland.com/blog/evented-django-part-one-socketio-and-gevent/</guid>
       <description>The buzz around the asynchronous, real-time web has been getting more and more attention lately, and for good reason. The old paradigm of thick servers and thin clients is getting outdated as the new web demands rich, fast, asynchronous, full-duplex messaging. The technologies that enable server-to-browser asynchronous messaging have been given the umbrella term &amp;ldquo;Comet,&amp;rdquo; and the number of ways to provide Comet services is growing constantly. The transport options include XHR-multipart, WebSockets, and Adobe Flash Sockets, among others.</description>
     </item>
     
     <item>
       <title>Django Template Tag Namespaces Now Possible</title>
-      <link>http://www.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</link>
+      <link>https://www.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</link>
       <pubDate>Mon, 09 Aug 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</guid>
+      <guid>https://www.codysoyland.com/blog/django-template-tag-namespaces-now-possible/</guid>
       <description>I&amp;rsquo;ve been interested in the Django template language for some time now, and I&amp;rsquo;ve admired much of its simplicity and extendibility. I even wrote a shell for it(screencast)and a two-phase template renderer. Having spent the time to understand how it works, I&amp;rsquo;ve also had my share of ideas on how to improve it (addition of &amp;ldquo;elif&amp;rdquo;, mathematical operations in variable tags, namespaces). The pony that I&amp;rsquo;ve been wanting the most is probably namespaces.</description>
     </item>
     
     <item>
       <title>Screencast - django-template-repl</title>
-      <link>http://www.codysoyland.com/blog/screencast-django-template-repl/</link>
+      <link>https://www.codysoyland.com/blog/screencast-django-template-repl/</link>
       <pubDate>Wed, 17 Feb 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/screencast-django-template-repl/</guid>
+      <guid>https://www.codysoyland.com/blog/screencast-django-template-repl/</guid>
       <description>Django-template-repl is a unique project aimed at providing debugging tools for the Django template language. I did a screencast to highlight its features.
 In this video, I describe how to use Django-template-repl&amp;rsquo;s management shell, template tag, and context-capturing features.
   Please grab the source or simply run:
@@ -70,68 +70,68 @@ pip install django-template-repl </description>
     
     <item>
       <title>Thread-Safe Object-Oriented Views in Django</title>
-      <link>http://www.codysoyland.com/blog/thread-safe-object-oriented-views-django/</link>
+      <link>https://www.codysoyland.com/blog/thread-safe-object-oriented-views-django/</link>
       <pubDate>Wed, 03 Feb 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/thread-safe-object-oriented-views-django/</guid>
+      <guid>https://www.codysoyland.com/blog/thread-safe-object-oriented-views-django/</guid>
       <description>An emerging design pattern in Django is the usage of class-based views. Writing views as classes is made possible by Python features that allow classes and objects to behave as callables, just like functions. They can help organize view code and promote reusability by offering a greater level of customization. However, callable objects sometimes have thread safety issues that developers are often not aware of.
  Update 2/2/11: This post is now mostly irrelevant, because Django will soon solve this problem with the newly-refactored generic view module in Django 1.</description>
     </item>
     
     <item>
       <title>Evaluating Django Caching Options</title>
-      <link>http://www.codysoyland.com/blog/evaluating-django-caching-options/</link>
+      <link>https://www.codysoyland.com/blog/evaluating-django-caching-options/</link>
       <pubDate>Sun, 17 Jan 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/evaluating-django-caching-options/</guid>
+      <guid>https://www.codysoyland.com/blog/evaluating-django-caching-options/</guid>
       <description>Caching is one of the first things you can do when you need to start thinking about scaling. Among efforts such as query minimization, denormalization, code optimizations, compression, database tuning, indexing, and load balancing, caching remains one of the lowest hanging fruits in methods to lighten your server load and handle huge amounts of traffic. There are many options, and I chose to evaluate a few of the most interesting setups.</description>
     </item>
     
     <item>
       <title>Django Template Debugging Made Easier with django-template-repl</title>
-      <link>http://www.codysoyland.com/blog/django-template-debugging-made-easier/</link>
+      <link>https://www.codysoyland.com/blog/django-template-debugging-made-easier/</link>
       <pubDate>Sun, 13 Dec 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/django-template-debugging-made-easier/</guid>
+      <guid>https://www.codysoyland.com/blog/django-template-debugging-made-easier/</guid>
       <description>When working with the Django template language, specifically writing template tags or trying out new template tags that are not well documented, it&amp;rsquo;s easy to fall into a testing loop that involves modifying your code, saving the file, causing runserver to restart, which could take some time for large projects, switching to your web browser, hitting reload, and viewing the results. This workflow can be repetitive and unproductive. I decided to improve template interpreter interactivity by writing a REPL for it, and I released the project as django-template-repl, which is freely available on Github and PyPI.</description>
     </item>
     
     <item>
       <title>New Blog</title>
-      <link>http://www.codysoyland.com/blog/new-blog/</link>
+      <link>https://www.codysoyland.com/blog/new-blog/</link>
       <pubDate>Sun, 13 Dec 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/new-blog/</guid>
+      <guid>https://www.codysoyland.com/blog/new-blog/</guid>
       <description>I dropped my old styles and went with Mingus.
 I set up a new blog today with django-mingus and so far I&amp;rsquo;m pretty pleased. Basically, I had some missing features on my blog and I decided to take the lazy route and use this instead of building everything by scratch. It&amp;rsquo;s still Django, so I can hack it up all I want, so I think I made the right choice.</description>
     </item>
     
     <item>
       <title>Building Search into Pip</title>
-      <link>http://www.codysoyland.com/blog/building-search-pip/</link>
+      <link>https://www.codysoyland.com/blog/building-search-pip/</link>
       <pubDate>Sat, 31 Oct 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/building-search-pip/</guid>
+      <guid>https://www.codysoyland.com/blog/building-search-pip/</guid>
       <description>I&amp;rsquo;ve begun using pip frequently for working with python packages in my virtualenvs. pip does a great job with installing (and now uninstalling) python packages, but it currently lacks a command that I miss from other types of package managers, such as aptitude and port &amp;ndash; search.
 I&amp;rsquo;ve forked a Git mirror of pip on Github for the purpose of tooling it with a search command, and I&amp;rsquo;ve made some progress in the last few days getting it working.</description>
     </item>
     
     <item>
       <title>Introduction to Surlex Slides from Djangocon 2009</title>
-      <link>http://www.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</link>
+      <link>https://www.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</link>
       <pubDate>Wed, 09 Sep 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</guid>
+      <guid>https://www.codysoyland.com/blog/introduction-surlex-slides-djangocon-2009/</guid>
       <description>I have uploaded my slides from my lightning talk on Surlex at Djangocon 2009.
 Here is the link.</description>
     </item>
     
     <item>
       <title>Introduction to Surlex</title>
-      <link>http://www.codysoyland.com/blog/introduction-surlex/</link>
+      <link>https://www.codysoyland.com/blog/introduction-surlex/</link>
       <pubDate>Sun, 06 Sep 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/introduction-surlex/</guid>
+      <guid>https://www.codysoyland.com/blog/introduction-surlex/</guid>
       <description>Surlex (Simple URL Expression) is a language for matching and extracting text, similar to regex (regular expression). It works by generating a regular expression from a more concise syntax that is designed to produce easy-to-read url patterns.
 Installation Surlex is indexed in PyPI, so it can be installed via pip or easy_install:
 pip install surlex Alternatively, the source code repository is available via git:
@@ -140,20 +140,20 @@ git clone git://github.com/codysoyland/surlex.git Basic Capturing A capture is p
     
     <item>
       <title>Serve your FLAC and OGG files to iTunes with Firefly</title>
-      <link>http://www.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</link>
+      <link>https://www.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</link>
       <pubDate>Sat, 05 Sep 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</guid>
+      <guid>https://www.codysoyland.com/blog/serve-your-flac-and-ogg-files-itunes-firefly/</guid>
       <description>The Firefly Media Server is a killer app for serving your music collection to DAAP-compatible music clients (including iTunes for Mac/Windows and Rhythmbox for Linux). One of it&amp;rsquo;s features that might go unnoticed is its ability to transcode OGG and FLAC compressed files to raw uncompressed sound, bypassing iTunes&amp;rsquo;s incompatibility with those formats.
 Getting Started The current stable Firefly release, version 0.2.4.2, does not scan FLAC metadata, so the resulting database contains &amp;ldquo;Unknown&amp;rdquo; for all the artist and song columns.</description>
     </item>
     
     <item>
       <title>Quick Directory Changing in Linux</title>
-      <link>http://www.codysoyland.com/blog/quick-directory-changing-linux/</link>
+      <link>https://www.codysoyland.com/blog/quick-directory-changing-linux/</link>
       <pubDate>Mon, 15 Jun 2009 00:00:00 +0000</pubDate>
       
-      <guid>http://www.codysoyland.com/blog/quick-directory-changing-linux/</guid>
+      <guid>https://www.codysoyland.com/blog/quick-directory-changing-linux/</guid>
       <description>When working from a terminal, I often find myself typing the same commands over and over. There are a handful of long &amp;ldquo;cd&amp;rdquo; commands that I find myself typing regularly. I&amp;rsquo;ve found a few ways of speeding up my workflow by using some bash tools and tricks, and now I can usually get where I need to be with just a few keystrokes.
 Aliases Here are a few commands I find myself typing regularly:</description>
     </item>
